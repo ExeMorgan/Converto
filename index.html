@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Converto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="appShell">
+  <header class="hero">
+    <div class="brand">
+      <span class="logoMark" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <path d="M4 9C4 6.23858 6.23858 4 9 4H12" stroke="#3562E9" stroke-width="2" stroke-linecap="round"/>
+          <path d="M9 1L4 4L9 7" stroke="#3562E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20 15C20 17.7614 17.7614 20 15 20H12" stroke="#16A34A" stroke-width="2" stroke-linecap="round"/>
+          <path d="M15 23L20 20L15 17" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div>
+        <h1>Converto</h1>
+        <p>Conversion, extraction de texte, compression et édition de documents dans une seule interface.</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Outils Converto">
+    <button type="button" class="tabBtn active" data-tab="convertPanel">Convertir</button>
+    <button type="button" class="tabBtn" data-tab="ocrPanel">Extraire texte</button>
+    <button type="button" class="tabBtn" data-tab="compressPanel">Réduire</button>
+    <button type="button" class="tabBtn" data-tab="editorPanel">Éditeur</button>
+    <button type="button" class="tabBtn" data-tab="contactPanel">Contact</button>
+  </nav>
+
+  <section class="panel active" id="convertPanel">
+    <div class="panelHead">
+      <div>
+        <h2>Convertisseur</h2>
+        <p>Ajoutez vos fichiers, choisissez un format, puis téléchargez le résultat.</p>
+      </div>
+    </div>
+
+    <div class="dropZone" id="dropZone" role="button" tabindex="0" aria-label="Zone de dépôt de fichiers à convertir">
+      <strong>Déposez vos fichiers ici</strong>
+      <span>ou</span>
+      <button type="button" id="chooseFilesBtn">Choisir des fichiers</button>
+      <input type="file" id="fileInput" multiple hidden aria-label="Sélectionner des fichiers à convertir">
+    </div>
+
+    <div id="resume" class="statsGrid">
+      <div class="stat">
+        <div class="label">Fichiers</div>
+        <div class="value" id="nbFiles">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Taille totale</div>
+        <div class="value" id="totalSize">0 o</div>
+      </div>
+    </div>
+
+    <div id="applyAll" class="toolBox hidden">
+      <h3>Appliquer une conversion à tous</h3>
+      <div class="row">
+        <select id="globalFormat" aria-label="Format à appliquer à tous les fichiers"></select>
+        <button type="button" id="applyAllBtn">Appliquer</button>
+      </div>
+    </div>
+
+    <div id="filesList" class="fileList"></div>
+
+    <button id="singleConvert" class="primaryAction hidden" type="button">Convertir</button>
+    <button id="convertButton" class="primaryAction hidden" type="button">Convertir tous les fichiers</button>
+
+    <div id="historySection">
+      <div class="historyHead">
+        <h3>Historique des conversions</h3>
+        <button type="button" class="ghost" id="clearHistoryBtn">Vider</button>
+      </div>
+      <ul id="historyList"></ul>
+      <p id="historyEmpty">Aucune conversion pour le moment.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="ocrPanel">
+    <div class="panelHead">
+      <div>
+        <h2>Extraire le texte d'une image</h2>
+        <p>Importez une image lisible, puis récupérez le texte détecté.</p>
+      </div>
+    </div>
+
+    <div class="splitGrid">
+      <div>
+        <label class="filePicker">
+          <input type="file" id="ocrInput" accept="image/*">
+          <span>Choisir une image</span>
+        </label>
+        <div class="previewFrame">
+          <img id="ocrPreview" alt="Aperçu de l'image" class="hidden">
+          <p id="ocrPlaceholder">Aucune image sélectionnée.</p>
+        </div>
+        <button type="button" id="ocrButton" class="primaryAction" disabled>Extraire le texte</button>
+        <div class="progressWrap hidden" id="ocrProgressWrap">
+          <div class="progressTrack"><div class="progressFill" id="ocrProgressFill"></div></div>
+          <div class="progressLabel"><span id="ocrProgressText">0%</span><span id="ocrStatus">En attente</span></div>
+        </div>
+      </div>
+
+      <div>
+        <label for="ocrOutput" class="fieldLabel">Texte extrait</label>
+        <textarea id="ocrOutput" spellcheck="false" placeholder="Le texte extrait apparaîtra ici."></textarea>
+        <div class="row">
+          <select id="ocrFormatSelect" aria-label="Format de téléchargement du texte extrait">
+            <option value="txt">TXT</option>
+            <option value="pdf">PDF</option>
+            <option value="html">HTML</option>
+            <option value="md">Markdown (.md)</option>
+            <option value="rtf">RTF</option>
+            <option value="docx">DOCX (Word)</option>
+            <option value="odt">ODT (OpenDocument)</option>
+          </select>
+          <button type="button" id="copyOcrBtn" class="ghost" disabled>Copier</button>
+          <button type="button" id="downloadOcrBtn" disabled>Télécharger</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="compressPanel">
+    <div class="panelHead">
+      <div>
+        <h2>Réduire le poids des fichiers</h2>
+        <p>Réduisez les images et créez une archive ZIP compressée pour les PDF, documents et autres fichiers.</p>
+      </div>
+    </div>
+
+    <div class="dropZone" id="compressDropZone" role="button" tabindex="0" aria-label="Zone de dépôt de fichiers à compresser">
+      <strong>Déposez les fichiers à réduire</strong>
+      <span>ou</span>
+      <button type="button" id="chooseCompressBtn">Choisir des fichiers</button>
+      <input type="file" id="compressInput" multiple hidden aria-label="Sélectionner des fichiers à compresser">
+    </div>
+
+    <div class="statsGrid">
+      <div class="stat">
+        <div class="label">Fichiers</div>
+        <div class="value" id="compressCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Taille totale</div>
+        <div class="value" id="compressSize">0 o</div>
+      </div>
+    </div>
+
+    <div id="compressList" class="fileList"></div>
+    <div class="toolBox hidden" id="compressSettings">
+      <h3>Réglages</h3>
+      <div class="settingsGrid">
+        <label>
+          Qualité
+          <input type="range" id="qualityRange" min="35" max="95" value="72">
+          <span id="qualityValue">72%</span>
+        </label>
+        <label>
+          Largeur maximale
+          <select id="maxWidthSelect">
+            <option value="0">Garder la taille</option>
+            <option value="2560">2560 px</option>
+            <option value="1920" selected>1920 px</option>
+            <option value="1280">1280 px</option>
+            <option value="900">900 px</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <button type="button" id="compressBtn" class="primaryAction hidden">Compresser les fichiers</button>
+  </section>
+
+  <section class="panel" id="editorPanel">
+    <div class="panelHead">
+      <div>
+        <h2>Éditeur de texte</h2>
+        <p>Écrivez et mettez en forme votre texte comme dans un traitement de texte, puis exportez-le dans le format de votre choix.</p>
+      </div>
+    </div>
+
+    <div class="editorWorkspace" id="editorWorkspace">
+      <div class="ribbon" id="editorRibbon">
+        <div class="ribbonTabs" id="ribbonTabs">
+          <button type="button" class="ribbonTabBtn active" data-group="file">Fichier</button>
+          <button type="button" class="ribbonTabBtn" data-group="edit">Édition</button>
+          <button type="button" class="ribbonTabBtn" data-group="font">Police</button>
+          <button type="button" class="ribbonTabBtn" data-group="paragraph">Paragraphe</button>
+          <button type="button" class="ribbonTabBtn" data-group="insert">Insertion</button>
+          <button type="button" class="ribbonTabBtn" data-group="view">Affichage</button>
+          <button type="button" id="btnFullscreen" class="ribbonFullscreenBtn" title="Plein écran">⛶ Plein écran</button>
+        </div>
+
+        <div class="ribbonGroup active" data-group="file">
+          <button type="button" id="btnNewDoc">Nouveau</button>
+          <button type="button" id="btnOpenDoc">Ouvrir</button>
+          <input type="file" id="openDocInput" accept=".txt,.html,.htm,.md,.docx,.pdf,.rtf,.odt,.csv" hidden>
+          <button type="button" id="editorImportPdfBtn">Importer un PDF</button>
+          <input type="file" id="editorPdfInput" accept="application/pdf" hidden aria-label="Importer un PDF dans l'éditeur">
+          <button type="button" id="btnPrint">Imprimer</button>
+          <button type="button" id="btnPageSetup" class="ghost">Mise en page</button>
+          <select id="recentDocsSelect" title="Documents récemment ouverts (nom seulement)">
+            <option value="">Documents récents</option>
+          </select>
+          <span id="editorImportStatus" class="importStatus"></span>
+        </div>
+
+        <div class="ribbonGroup" data-group="edit">
+          <button type="button" data-cmd="undo" title="Annuler">↺ Annuler</button>
+          <button type="button" data-cmd="redo" title="Rétablir">↻ Rétablir</button>
+          <button type="button" data-cmd="cut" title="Couper">Couper</button>
+          <button type="button" data-cmd="copy" title="Copier">Copier</button>
+          <button type="button" id="btnDeleteSel" title="Supprimer la sélection">Supprimer</button>
+          <button type="button" id="btnSelectAll" title="Tout sélectionner">Tout sélect.</button>
+          <button type="button" id="btnFindReplace" title="Rechercher / Remplacer">Rechercher / Remplacer</button>
+          <button type="button" id="btnInsertDate" title="Insérer la date/heure">Date / Heure</button>
+        </div>
+
+        <div class="ribbonGroup" data-group="font">
+          <button type="button" data-cmd="bold" title="Gras"><b>G</b></button>
+          <button type="button" data-cmd="italic" title="Italique"><i>I</i></button>
+          <button type="button" data-cmd="underline" title="Souligné"><u>S</u></button>
+          <button type="button" data-cmd="strikeThrough" title="Barré"><s>B</s></button>
+          <button type="button" data-cmd="subscript" title="Indice">X₂</button>
+          <button type="button" data-cmd="superscript" title="Exposant">X²</button>
+          <select id="fontNameSelect" title="Police">
+            <option value="Arial">Arial</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+          </select>
+          <select id="fontSizeSelect" title="Taille">
+            <option value="2">Petit</option>
+            <option value="3" selected>Normal</option>
+            <option value="4">Moyen</option>
+            <option value="5">Grand</option>
+            <option value="6">Très grand</option>
+            <option value="7">Titre</option>
+          </select>
+          <input type="color" id="fontColorInput" value="#1b2430" title="Couleur du texte">
+          <input type="color" id="highlightColorInput" value="#fff59d" title="Couleur de surlignage">
+          <button type="button" data-cmd="removeFormat" class="ghost" title="Effacer la mise en forme">Effacer</button>
+        </div>
+
+        <div class="ribbonGroup" data-group="paragraph">
+          <button type="button" data-cmd="justifyLeft" title="Aligner à gauche">⯇</button>
+          <button type="button" data-cmd="justifyCenter" title="Centrer">☰</button>
+          <button type="button" data-cmd="justifyRight" title="Aligner à droite">⯈</button>
+          <button type="button" data-cmd="justifyFull" title="Justifier">☰☰</button>
+          <button type="button" data-cmd="outdent" title="Diminuer le retrait">⇤</button>
+          <button type="button" data-cmd="indent" title="Augmenter le retrait">⇥</button>
+          <select id="lineHeightSelect" title="Interligne">
+            <option value="">Interligne</option>
+            <option value="1">1</option>
+            <option value="1.15">1.15</option>
+            <option value="1.5">1.5</option>
+            <option value="2">2</option>
+          </select>
+          <button type="button" data-cmd="insertUnorderedList" title="Liste à puces">• Liste</button>
+          <button type="button" data-cmd="insertOrderedList" title="Liste numérotée">1. Liste</button>
+        </div>
+
+        <div class="ribbonGroup" data-group="insert">
+          <button type="button" id="btnInsertImage">Image</button>
+          <input type="file" id="insertImageInput" accept="image/*" hidden>
+          <button type="button" id="btnImproveImage">Améliorer l'image</button>
+          <button type="button" id="btnImageLeft">Image gauche</button>
+          <button type="button" id="btnImageCenter">Image centre</button>
+          <button type="button" id="btnImageRight">Image droite</button>
+          <button type="button" id="btnInsertLink">Lien</button>
+          <button type="button" id="btnInsertTable">Tableau</button>
+        </div>
+
+        <div class="ribbonGroup" data-group="view">
+          <button type="button" id="zoomOutBtn" title="Zoom arrière">Zoom −</button>
+          <span id="zoomLabel">100%</span>
+          <button type="button" id="zoomInBtn" title="Zoom avant">Zoom +</button>
+          <button type="button" id="zoomResetBtn" title="Revenir à 100%">100%</button>
+        </div>
+      </div>
+
+      <div class="toolBox hidden" id="pageSetupBox">
+        <h3>Mise en page</h3>
+        <div class="settingsGrid">
+          <label>
+            Marges (mm)
+            <input type="number" id="marginInput" min="0" max="60" value="20">
+          </label>
+          <label>
+            Orientation
+            <select id="orientationSelect">
+              <option value="p">Portrait</option>
+              <option value="l">Paysage</option>
+            </select>
+          </label>
+          <label>
+            Taille du papier
+            <select id="paperSizeSelect">
+              <option value="a4">A4</option>
+              <option value="letter">Letter</option>
+            </select>
+          </label>
+        </div>
+        <label class="fieldLabel" for="headerInput">En-tête (utilisé pour l'export PDF)</label>
+        <input type="text" id="headerInput" placeholder="Texte d'en-tête (optionnel)">
+        <label class="fieldLabel" for="footerInput">Pied de page (utilisé pour l'export PDF)</label>
+        <input type="text" id="footerInput" placeholder="Texte de pied de page (optionnel)">
+      </div>
+
+      <div class="toolBox hidden" id="findReplaceBox">
+        <div class="settingsGrid">
+          <label>Rechercher <input type="text" id="findInput"></label>
+          <label>Remplacer par <input type="text" id="replaceInput"></label>
+        </div>
+        <div class="row">
+          <button type="button" id="findNextBtn">Suivant</button>
+          <button type="button" id="replaceAllBtn">Tout remplacer</button>
+          <button type="button" class="ghost" id="closeFindBtn">Fermer</button>
+        </div>
+      </div>
+
+      <div class="pageScrollArea" id="pageScrollArea">
+        <div id="editorArea" class="editorArea" contenteditable="true" spellcheck="true">Écrivez votre texte ici...</div>
+      </div>
+
+      <div class="statusBar" id="editorStatusBar">0 mot(s) · 0 caractère(s)</div>
+    </div>
+
+    <div class="row">
+      <select id="editorFormatSelect" aria-label="Format d'export du document">
+        <option value="pdf">PDF</option>
+        <option value="docx">DOCX (Word)</option>
+        <option value="odt">ODT (OpenDocument)</option>
+        <option value="rtf">RTF</option>
+        <option value="html">HTML</option>
+        <option value="md">Markdown (.md)</option>
+        <option value="txt">TXT</option>
+      </select>
+      <button type="button" id="editorDownloadBtn">Télécharger</button>
+    </div>
+  </section>
+
+  <section class="panel" id="contactPanel">
+    <div class="panelHead">
+      <div>
+        <h2>Créateur</h2>
+        <p>Informations de contact pour Converto.</p>
+      </div>
+    </div>
+
+    <div class="contactCard">
+      <div>
+        <span class="contactLabel">Nom et prénom</span>
+        <strong>Morgan Luky</strong>
+      </div>
+      <div>
+        <span class="contactLabel">Adresse mail</span>
+        <a href="mailto:morgan.codeur@gmail.com">morgan.codeur@gmail.com</a>
+      </div>
+      <p>Pour toute question, demande de mise à jour, amélioration, signalement de bug ou autre demande concernant Converto, contactez-moi à cette adresse mail.</p>
+    </div>
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
